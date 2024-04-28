@@ -76,7 +76,7 @@ def get_work_items_batch(ids: List[str], end_date) -> Iterator[WorkItem]:
     for chunk in chunks(ids):
         request = WorkItemBatchGetRequest(error_policy="fail", ids=chunk, fields=["System.Id", "System.Title", "System.WorkItemType", "System.Description", "Microsoft.VSTS.TCM.ReproSteps", "System.Parent", "System.State", closed_date_field])
         for work in work_client.get_work_items_batch(request):
-            if work.fields["System.WorkItemType"] == "Task" and work.fields["System.Parent"] not in ids:
+            if work.fields["System.WorkItemType"] == "Task" and "System.Parent" in work.fields and work.fields["System.Parent"] not in ids:
                 missing_parents.append(work.fields["System.Parent"])
             cleanup_work(work)
             yield work
