@@ -29,6 +29,8 @@ def get_my_prs_from_repo(repo: GitRepository, start_date, end_date):
     # print(f"Scanning repository: {repo.name}")
     if 'isDisabled' in repo.additional_properties and repo.additional_properties['isDisabled'] == True:
         return 
+    
+    print(f">> getting PRs for repo: {repo.name}")
 
     try:
         while True:
@@ -88,10 +90,13 @@ def get_work_items_batch(ids: List[str], end_date) -> Iterator[WorkItem]:
             yield work
 
 def get_work_items_ids_assigned_to_me(start_date, end_date, project) -> Iterator[str]:
+    print(f">> workitems: {project} {start_date}-{end_date} for {author}")
     ctx = TeamContext(project=project)
     wiql = Wiql('SELECT [System.Id], [System.Title], [System.WorkItemType], [System.Description], [System.Parent] FROM WorkItems ' 
                 f'WHERE [System.AssignedTo] = "{author}" and [{closed_date_field}] >= "{start_date}" and [{closed_date_field}] <= "{end_date}"  ORDER BY [{closed_date_field}] Desc')
     items = work_client.query_by_wiql(wiql, team_context=ctx, time_precision=True)
+
+    print(f">> found {len(items.work_items)} work items assigned to {author}")
     return [w.id for w in items.work_items]
 
 def get_my_work_items_ids(prs: List[GitPullRequest], start_date, end_date, project) -> Iterator[WorkItem]:
